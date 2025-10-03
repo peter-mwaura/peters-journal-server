@@ -1,0 +1,34 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    image: nestjs-api:dev
+    environment:
+      - DATABASE_URL=postgresql://postgres:secret@database:5432/blogdb
+    ports:
+      - '3000:3000'
+    volumes:
+      - ../:/usr/src/app
+    networks:
+      - petersblog-network
+
+  database:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=blogdb
+    ports:
+      - '5432:5432'
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - petersblog-network
+
+volumes:
+  pg-data:
+
+networks:
+  petersblog-network:
+    driver: bridge

@@ -1,0 +1,42 @@
+# Node / Package Manager
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build Artifacts
+dist
+build
+coverage
+.tmp
+
+# Logs
+*.log
+logs
+*.out
+*.err
+
+# Env files (secrets)
+.env
+.env.local
+.env.*.local
+
+# IDE / Editor
+.vscode
+.codium
+.idea
+*.swp
+*.swo
+*.swn
+*.bak
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Git / Husky (keep husky if you want hooks inside container)
+.git
+.gitignore
+.gitmodules
+.gitattributes
