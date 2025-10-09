@@ -40,7 +40,10 @@ export default tseslint.config(
       // TypeScript/NestJS rules
       '@typescript-eslint/explicit-function-return-type': 'off', // let NestJS handle return types
       '@typescript-eslint/no-explicit-any': 'warn', // discourage but don’t block `any`
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }], // allow unused args starting with _
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ], // allow unused args starting with _
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
 
