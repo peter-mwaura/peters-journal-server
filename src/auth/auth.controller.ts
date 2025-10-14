@@ -1,8 +1,12 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { Public } from 'src/common/decorators/public.decorator';
-import { AuthService } from './auth.service';
-import { loginDto, SignupDto } from './dto/auth.dto';
+import { AuthService, SafeUser } from './auth.service';
+import { SignupDto } from './dto/auth.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+
+interface AuthenticatedUser extends Request {
+  user: SafeUser;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -17,7 +21,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  async login(@Body() dto: loginDto) {
-    return await this.authService.login(dto);
+  async login(@Req() request: AuthenticatedUser) {
+    return await this.authService.login(request.user);
   }
 }
