@@ -1,9 +1,12 @@
 import { ConflictException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { loginDto, SignupDto } from './dto/auth.dto';
+
+export type SafeUser = Omit<User, 'password'>;
 
 @Injectable()
 export class AuthService {
@@ -52,6 +55,25 @@ export class AuthService {
     const { email, password } = dto;
 
     // check if user exists in the database
+    const userWithoutPassword = await this.validateUser(email, password);
+
+    // attach token to return userWIthoutPassword
+    const payload = { sub: userWithoutPassword.id, email: userWithoutPassword.email };
+    const userWithToken = {
+      ...userWithoutPassword,
+      accessToken: await this.jwtService.signAsync(payload),
+    };
+
+    return {
+      message: 'Login successful!',
+      success: true,
+      statusCode: HttpStatus.OK,
+      data: userWithToken,
+    };
+  }
+
+  async validateUser(email: string, password: string): Promise<SafeUser> {
+    // check if user exists in the database
     const existingUser = await this.usersService.findUserByEmail(email);
     if (!existingUser) {
       throw new UnauthorizedException('A user with that email does not exist!');
@@ -66,18 +88,6 @@ export class AuthService {
     // remove password before returning
     const { password: _, ...userWithoutPassword } = existingUser;
 
-    // attach token to return userWIthoutPassword
-    const payload = { sub: existingUser.id, email: existingUser.email };
-    const userWithToken = {
-      ...userWithoutPassword,
-      accessToken: await this.jwtService.signAsync(payload),
-    };
-
-    return {
-      message: 'Login successful!',
-      success: true,
-      statusCode: HttpStatus.OK,
-      data: userWithToken,
-    };
+    return userWithoutPassword;
   }
 }
