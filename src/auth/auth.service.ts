@@ -4,7 +4,7 @@ import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
-import { loginDto, SignupDto } from './dto/auth.dto';
+import { SignupDto } from './dto/auth.dto';
 
 export type SafeUser = Omit<User, 'password'>;
 
@@ -50,25 +50,21 @@ export class AuthService {
     };
   }
 
-  async login(dto: loginDto) {
-    // fetch user email and password
-    const { email, password } = dto;
+  async login(user: SafeUser) {
+    // user is already validated by the LocalStrategy
+    const payload = { sub: user.id, email: user.email };
 
-    // check if user exists in the database
-    const userWithoutPassword = await this.validateUser(email, password);
-
-    // attach token to return userWIthoutPassword
-    const payload = { sub: userWithoutPassword.id, email: userWithoutPassword.email };
-    const userWithToken = {
-      ...userWithoutPassword,
-      accessToken: await this.jwtService.signAsync(payload),
-    };
+    // generte access token
+    const accessToken = await this.jwtService.signAsync(payload);
 
     return {
       message: 'Login successful!',
       success: true,
       statusCode: HttpStatus.OK,
-      data: userWithToken,
+      data: {
+        ...user,
+        accessToken,
+      },
     };
   }
 
