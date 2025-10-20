@@ -18,7 +18,7 @@ export class AuthService {
 
   async signUp(dto: SignupDto) {
     // fetch user email, name and password
-    const { email, name, password } = dto;
+    const { email, name, password, role } = dto;
     const authorName = name ?? email.split('@')[0];
 
     // throw an exception if user already exists
@@ -37,6 +37,7 @@ export class AuthService {
         email,
         name: authorName,
         password: hashedPassword,
+        ...(role && { role }), // include role only if provided
       },
     });
 
@@ -45,14 +46,14 @@ export class AuthService {
     return {
       message: 'User created successfully!',
       success: true,
-      statusCode: HttpStatus.OK,
+      statusCode: HttpStatus.CREATED,
       data: userWithoutPassword,
     };
   }
 
   async login(user: SafeUser) {
     // user is already validated by the LocalStrategy
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role };
 
     // generte access token
     const accessToken = await this.jwtService.signAsync(payload);
